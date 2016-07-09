@@ -1,0 +1,14 @@
+/.bundle/
+/.yardoc
+/Gemfile.lock
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+/ext/mmdb/.RUBYARCHDIR.time
+/ext/mmdb/Makefile
+/ext/mmdb/mmdb.bundle
+/ext/mmdb/mmdb.o
+/ext/mmdb/mkmf.log
