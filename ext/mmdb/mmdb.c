@@ -52,6 +52,7 @@ maxminddb_memsize(const void *p) {
 void
 maxminddb_free(void *p) {
     struct MaxMindDB *ptr = p;
+
     if (ptr) {
         if (ptr->mmdb) {
             MMDB_close(ptr->mmdb);
@@ -72,9 +73,11 @@ static const rb_data_type_t mmdb_data_type = {
 static struct MaxMindDB*
 get_maxminddb(VALUE self) {
     struct MaxMindDB *ptr = check_maxminddb(self);
+
     if (!ptr) {
         rb_raise(rb_eStandardError, "uninitialized");
     }
+
     return ptr;
 }
 
@@ -134,7 +137,6 @@ maxminddb_initialize(int argc, VALUE* argv, VALUE self) {
 VALUE
 maxminddb_lookup(VALUE self, VALUE ip) {
     VALUE ret;
-    char *target;
     int gai_error, mmdb_error;
     struct MaxMindDB *ptr = MaxMindDB(self);
     MMDB_s *mmdb = ptr->mmdb;
@@ -143,9 +145,7 @@ maxminddb_lookup(VALUE self, VALUE ip) {
         return Qnil;
     }
 
-    target = StringValuePtr(ip);
-
-    MMDB_lookup_result_s lookuped = MMDB_lookup_string(mmdb, target, &gai_error, &mmdb_error);
+    MMDB_lookup_result_s lookuped = MMDB_lookup_string(mmdb, StringValuePtr(ip), &gai_error, &mmdb_error);
     if (gai_error) {
         rb_sys_fail(gai_strerror(gai_error));
     }

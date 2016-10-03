@@ -4,11 +4,11 @@
 /_yardoc/
 /coverage/
 /doc/
+/ext/mmdb/.RUBYARCHDIR.time
+/ext/mmdb/Makefile
+/ext/mmdb/mkmf.log
+/ext/mmdb/mmdb.bundle
+/ext/mmdb/mmdb.o
 /pkg/
 /spec/reports/
 /tmp/
-/ext/mmdb/.RUBYARCHDIR.time
-/ext/mmdb/Makefile
-/ext/mmdb/mmdb.bundle
-/ext/mmdb/mmdb.o
-/ext/mmdb/mkmf.log
