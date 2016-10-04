@@ -185,6 +185,7 @@ maxminddb_close(VALUE self) {
     if (ptr) {
         if (ptr->mmdb) {
             MMDB_close(ptr->mmdb);
+            ptr->mmdb = NULL;
         }
     }
 
