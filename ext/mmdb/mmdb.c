@@ -194,13 +194,13 @@ maxminddb_close(VALUE self) {
 
 void
 maxminddb_init_rb_variables() {
-    rb_sym_city = rb_to_symbol(rb_str_new2(city));
-    rb_sym_country = rb_to_symbol(rb_str_new2(country));
-    rb_sym_country_code = rb_to_symbol(rb_str_new2(country_code));
-    rb_sym_continent = rb_to_symbol(rb_str_new2(continent));
-    rb_sym_latitude = rb_to_symbol(rb_str_new2(latitude));
-    rb_sym_longitude = rb_to_symbol(rb_str_new2(longitude));
-    rb_sym_postcode = rb_to_symbol(rb_str_new2(postcode));
+    rb_sym_city = ID2SYM(rb_intern(city));
+    rb_sym_country = ID2SYM(rb_intern(country));
+    rb_sym_country_code = ID2SYM(rb_intern(country_code));
+    rb_sym_continent = ID2SYM(rb_intern(continent));
+    rb_sym_latitude = ID2SYM(rb_intern(latitude));
+    rb_sym_longitude = ID2SYM(rb_intern(longitude));
+    rb_sym_postcode = ID2SYM(rb_intern(postcode));
 }
 
 void
