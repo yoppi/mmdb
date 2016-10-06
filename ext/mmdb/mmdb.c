@@ -15,6 +15,7 @@ static VALUE rb_sym_continent;
 static VALUE rb_sym_latitude;
 static VALUE rb_sym_longitude;
 static VALUE rb_sym_postcode;
+static VALUE rb_sym_subdivisions;
 
 const static char *en = "en";
 const static char *names = "names";
@@ -29,6 +30,7 @@ const static char *postal = "postal";
 const static char *code = "code";
 const static char *iso_code = "iso_code";
 const static char *postcode = "postcode";
+const static char *subdivisions = "subdivisions";
 
 struct MaxMindDB {
     MMDB_s *mmdb;
@@ -69,6 +71,10 @@ static const rb_data_type_t mmdb_data_type = {
 };
 
 #define check_maxminddb(self) ((struct MaxMindDB*)rb_check_typeddata((self), &mmdb_data_type))
+#define number_of_digits(n, count) do { \
+    n /= 10; \
+    count++; \
+} while (n != 0)
 
 static struct MaxMindDB*
 get_maxminddb(VALUE self) {
@@ -157,20 +163,52 @@ maxminddb_lookup(VALUE self, VALUE ip) {
         ret = rb_hash_new();
         MMDB_entry_data_s data;
         MMDB_entry_s *entry = &lookuped.entry;
+
         MMDB_get_value(entry, &data, city, names, en, NULL);
         maxminddb_set_result(ret, rb_sym_city, &data);
+
         MMDB_get_value(entry, &data, country, names, en, NULL);
         maxminddb_set_result(ret, rb_sym_country, &data);
+
         MMDB_get_value(entry, &data, country, iso_code, NULL);
         maxminddb_set_result(ret, rb_sym_country_code, &data);
+
         MMDB_get_value(entry, &data, continent, names, en, NULL);
         maxminddb_set_result(ret, rb_sym_continent, &data);
+
         MMDB_get_value(entry, &data, location, latitude, NULL);
         maxminddb_set_result(ret, rb_sym_latitude, &data);
+
         MMDB_get_value(entry, &data, location, longitude, NULL);
         maxminddb_set_result(ret, rb_sym_longitude, &data);
+
         MMDB_get_value(entry, &data, postal, code, NULL);
         maxminddb_set_result(ret, rb_sym_postcode, &data);
+
+        MMDB_get_value(entry, &data, subdivisions, NULL);
+        if (data.has_data) {
+            // subdivisions fields is basically array
+            if (data.type == MMDB_DATA_TYPE_ARRAY) {
+                VALUE ary = rb_ary_new();
+                int n, data_size;
+                int count = 0;
+                n = data_size = data.data_size;
+                number_of_digits(n, count);
+                char index[count+1];
+
+                for (int i = 0; i < data_size; i++) {
+                    sprintf(index, "%d", i);
+                    MMDB_get_value(entry, &data, subdivisions, index, names, en, NULL);
+                    if (data.has_data) {
+                        if (data.type == MMDB_DATA_TYPE_UTF8_STRING) {
+                            rb_ary_push(ary, rb_utf8_str_new(data.utf8_string, data.data_size));
+                        }
+                    }
+                }
+
+                rb_hash_aset(ret, rb_sym_subdivisions, ary);
+            }
+        }
     } else {
         ret = Qnil;
     }
@@ -201,6 +239,7 @@ maxminddb_init_rb_variables() {
     rb_sym_latitude = ID2SYM(rb_intern(latitude));
     rb_sym_longitude = ID2SYM(rb_intern(longitude));
     rb_sym_postcode = ID2SYM(rb_intern(postcode));
+    rb_sym_subdivisions = ID2SYM(rb_intern(subdivisions));
 }
 
 void
