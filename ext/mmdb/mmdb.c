@@ -208,6 +208,8 @@ maxminddb_lookup(VALUE self, VALUE ip) {
 
                 rb_hash_aset(ret, rb_sym_subdivisions, ary);
             }
+        } else {
+            rb_hash_aset(ret, rb_sym_subdivisions, Qnil);
         }
     } else {
         ret = Qnil;
