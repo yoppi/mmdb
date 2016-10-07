@@ -17,20 +17,20 @@ static VALUE rb_sym_longitude;
 static VALUE rb_sym_postcode;
 static VALUE rb_sym_subdivisions;
 
-const static char *en = "en";
-const static char *names = "names";
-const static char *city = "city";
-const static char *country = "country";
-const static char *country_code = "country_code";
-const static char *continent = "continent";
-const static char *location = "location";
-const static char *latitude = "latitude";
-const static char *longitude = "longitude";
-const static char *postal = "postal";
-const static char *code = "code";
-const static char *iso_code = "iso_code";
-const static char *postcode = "postcode";
-const static char *subdivisions = "subdivisions";
+static const char *en = "en";
+static const char *names = "names";
+static const char *city = "city";
+static const char *country = "country";
+static const char *country_code = "country_code";
+static const char *continent = "continent";
+static const char *location = "location";
+static const char *latitude = "latitude";
+static const char *longitude = "longitude";
+static const char *postal = "postal";
+static const char *code = "code";
+static const char *iso_code = "iso_code";
+static const char *postcode = "postcode";
+static const char *subdivisions = "subdivisions";
 
 struct MaxMindDB {
     MMDB_s *mmdb;
@@ -145,13 +145,15 @@ maxminddb_lookup(VALUE self, VALUE ip) {
     VALUE ret;
     int gai_error, mmdb_error;
     struct MaxMindDB *ptr = MaxMindDB(self);
-    MMDB_s *mmdb = ptr->mmdb;
+    MMDB_lookup_result_s lookuped;
+    MMDB_entry_data_s data;
+    MMDB_entry_s *entry;
 
     if (NIL_P(ip)) {
         return Qnil;
     }
 
-    MMDB_lookup_result_s lookuped = MMDB_lookup_string(mmdb, StringValuePtr(ip), &gai_error, &mmdb_error);
+    lookuped = MMDB_lookup_string(ptr->mmdb, StringValuePtr(ip), &gai_error, &mmdb_error);
     if (gai_error) {
         rb_sys_fail(gai_strerror(gai_error));
     }
@@ -161,8 +163,7 @@ maxminddb_lookup(VALUE self, VALUE ip) {
 
     if (lookuped.found_entry) {
         ret = rb_hash_new();
-        MMDB_entry_data_s data;
-        MMDB_entry_s *entry = &lookuped.entry;
+        entry = &lookuped.entry;
 
         MMDB_get_value(entry, &data, city, names, en, NULL);
         maxminddb_set_result(ret, rb_sym_city, &data);
@@ -190,13 +191,14 @@ maxminddb_lookup(VALUE self, VALUE ip) {
             // subdivisions fields is basically array
             if (data.type == MMDB_DATA_TYPE_ARRAY) {
                 VALUE ary = rb_ary_new();
+                int i;
                 int n, data_size;
                 int count = 0;
                 n = data_size = data.data_size;
                 number_of_digits(n, count);
                 char index[count+1];
 
-                for (int i = 0; i < data_size; i++) {
+                for (i = 0; i < data_size; i++) {
                     sprintf(index, "%d", i);
                     MMDB_get_value(entry, &data, subdivisions, index, names, en, NULL);
                     if (data.has_data) {
