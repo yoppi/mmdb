@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "mmdb"
-  spec.version       = "0.1.5"
+  spec.version       = "0.2.0"
   spec.authors       = ["yoppi"]
   spec.email         = ["y.hirokazu@gmail.com"]
 
