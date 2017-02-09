@@ -70,15 +70,6 @@ static const rb_data_type_t mmdb_data_type = {
     RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
-// Supported 2.1 later
-#if RUBY_API_VERSION_CODE <= 20100
-VALUE
-rb_utf8_str_new(const char *ptr, long len) {
-    VALUE str = rb_str_new(ptr, len);
-    rb_enc_associate_index(str, rb_utf8_encindex());
-    return str;
-}
-#endif
 #define check_maxminddb(self) ((struct MaxMindDB*)rb_check_typeddata((self), &mmdb_data_type))
 #define number_of_digits(n, count) do { \
     n /= 10; \
@@ -102,6 +93,16 @@ static VALUE
 maxminddb_alloc(VALUE klass) {
     return TypedData_Wrap_Struct(klass, &mmdb_data_type, 0);
 }
+
+// Supported 2.1 later
+#if (defined RUBY_API_VERSION_CODE) && (RUBY_API_VERSION_CODE <= 20100)
+static VALUE
+rb_utf8_str_new(const char *ptr, long len) {
+    VALUE str = rb_str_new(ptr, len);
+    rb_enc_associate_index(str, rb_utf8_encindex());
+    return str;
+}
+#endif
 
 static void
 maxminddb_set_result(VALUE hash, VALUE key, MMDB_entry_data_s *data) {
