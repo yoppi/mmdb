@@ -165,10 +165,10 @@ maxminddb_lookup(VALUE self, VALUE ip) {
 
     lookuped = MMDB_lookup_string(ptr->mmdb, StringValuePtr(ip), &gai_error, &mmdb_error);
     if (gai_error) {
-        rb_raise(rb_eTypeError, gai_strerror(gai_error));
+        rb_raise(rb_eTypeError, "%s", gai_strerror(gai_error));
     }
     if (mmdb_error) {
-        rb_raise(rb_eTypeError, MMDB_strerror(mmdb_error));
+        rb_raise(rb_eTypeError, "%s", MMDB_strerror(mmdb_error));
     }
 
     if (lookuped.found_entry) {
