@@ -201,14 +201,17 @@ maxminddb_lookup(VALUE self, VALUE ip) {
             // subdivisions fields is basically array
             if (data.type == MMDB_DATA_TYPE_ARRAY) {
                 VALUE ary = rb_ary_new();
-                int i;
-                int n, data_size;
-                int count = 0;
-                n = data_size = data.data_size;
-                number_of_digits(n, count);
-                char index[count+1];
+                unsigned int i, n;
+                unsigned int cnt = 0;
+                char *index;
 
-                for (i = 0; i < data_size; i++) {
+                // need to specify index as char*
+                n = data.data_size;
+                number_of_digits(n, cnt);
+                index = (char *)malloc(sizeof(char)*cnt+1);
+                memset(index, 0, sizeof(char)*cnt+1);
+
+                for (i = 0; i < data.data_size; i++) {
                     sprintf(index, "%d", i);
                     MMDB_get_value(entry, &data, subdivisions, index, names, en, NULL);
                     if (data.has_data) {
@@ -217,6 +220,8 @@ maxminddb_lookup(VALUE self, VALUE ip) {
                         }
                     }
                 }
+
+                free(index);
 
                 rb_hash_aset(ret, rb_sym_subdivisions, ary);
             }
