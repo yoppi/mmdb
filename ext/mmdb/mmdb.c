@@ -108,14 +108,14 @@ static void
 maxminddb_set_result(VALUE hash, VALUE key, MMDB_entry_data_s *data) {
     if (data->has_data) {
         switch (data->type) {
-        case MMDB_DATA_TYPE_UTF8_STRING:
-            rb_hash_aset(hash, key, rb_utf8_str_new(data->utf8_string, data->data_size));
-            break;
-        case MMDB_DATA_TYPE_DOUBLE:
-            rb_hash_aset(hash, key, rb_float_new(data->double_value));
-            break;
-        default:
-            rb_hash_aset(hash, key, Qnil);
+            case MMDB_DATA_TYPE_UTF8_STRING:
+                rb_hash_aset(hash, key, rb_utf8_str_new(data->utf8_string, data->data_size));
+                break;
+            case MMDB_DATA_TYPE_DOUBLE:
+                rb_hash_aset(hash, key, rb_float_new(data->double_value));
+                break;
+            default:
+                rb_hash_aset(hash, key, Qnil);
         }
     } else {
         rb_hash_aset(hash, key, Qnil);
