@@ -145,25 +145,37 @@ maxminddb_initialize(int argc, VALUE* argv, VALUE self) {
 
 /**
  *
- * mmdb.lookup("123.45.67.89") -> Hash
+ * mmdb.lookup("123.45.67.89") -> Hash (Default values is English)
+ * mmdb.lookup("123.45.67.89", "ja") -> Hash (Values is Japanese)
  *
- * TODO:
- *   To receive `opts` argument that have language code and respond specified language data.
  */
 VALUE
-maxminddb_lookup(VALUE self, VALUE ip) {
+maxminddb_lookup(int argc, VALUE* argv, VALUE self) {
     VALUE ret;
+
     int gai_error, mmdb_error;
+    const char *ip, *lang;
     struct MaxMindDB *ptr = MaxMindDB(self);
     MMDB_lookup_result_s lookuped;
     MMDB_entry_data_s data;
     MMDB_entry_s *entry;
 
-    if (NIL_P(ip)) {
+    if (NIL_P(argv[0])) {
         return Qnil;
     }
+    ip = StringValuePtr(argv[0]);
 
-    lookuped = MMDB_lookup_string(ptr->mmdb, StringValuePtr(ip), &gai_error, &mmdb_error);
+    switch (argc) {
+        case 1:
+            lang = en;
+            break;
+        case 2:
+            lang = StringValuePtr(argv[1]);
+            break;
+    }
+
+
+    lookuped = MMDB_lookup_string(ptr->mmdb, ip, &gai_error, &mmdb_error);
     if (gai_error) {
         rb_raise(rb_eTypeError, "%s", gai_strerror(gai_error));
     }
@@ -175,16 +187,16 @@ maxminddb_lookup(VALUE self, VALUE ip) {
         ret = rb_hash_new();
         entry = &lookuped.entry;
 
-        MMDB_get_value(entry, &data, city, names, en, NULL);
+        MMDB_get_value(entry, &data, city, names, lang, NULL);
         maxminddb_set_result(ret, rb_sym_city, &data);
 
-        MMDB_get_value(entry, &data, country, names, en, NULL);
+        MMDB_get_value(entry, &data, country, names, lang, NULL);
         maxminddb_set_result(ret, rb_sym_country, &data);
 
         MMDB_get_value(entry, &data, country, iso_code, NULL);
         maxminddb_set_result(ret, rb_sym_country_code, &data);
 
-        MMDB_get_value(entry, &data, continent, names, en, NULL);
+        MMDB_get_value(entry, &data, continent, names, lang, NULL);
         maxminddb_set_result(ret, rb_sym_continent, &data);
 
         MMDB_get_value(entry, &data, location, latitude, NULL);
@@ -213,7 +225,7 @@ maxminddb_lookup(VALUE self, VALUE ip) {
 
                 for (i = 0; i < data.data_size; i++) {
                     sprintf(index, "%d", i);
-                    MMDB_get_value(entry, &data, subdivisions, index, names, en, NULL);
+                    MMDB_get_value(entry, &data, subdivisions, index, names, lang, NULL);
                     if (data.has_data) {
                         if (data.type == MMDB_DATA_TYPE_UTF8_STRING) {
                             rb_ary_push(ary, rb_utf8_str_new(data.utf8_string, data.data_size));
@@ -268,7 +280,7 @@ Init_mmdb() {
     rb_define_alloc_func(rb_cMaxMindDB, maxminddb_alloc);
 
     rb_define_method(rb_cMaxMindDB, "initialize", maxminddb_initialize, -1);
-    rb_define_method(rb_cMaxMindDB, "lookup", maxminddb_lookup, 1);
+    rb_define_method(rb_cMaxMindDB, "lookup", maxminddb_lookup, -1);
     rb_define_method(rb_cMaxMindDB, "close", maxminddb_close, 0);
 
     maxminddb_init_rb_variables();
