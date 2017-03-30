@@ -1,4 +1,5 @@
 #include <ruby.h>
+#include <ruby/version.h>
 
 #include <maxminddb.h>
 #include <netdb.h>
@@ -95,7 +96,8 @@ maxminddb_alloc(VALUE klass) {
 }
 
 // Supported 2.1 later
-#if (defined RUBY_API_VERSION_CODE) && (RUBY_API_VERSION_CODE <= 20100)
+#if (defined RUBY_API_VERSION_CODE) && (RUBY_API_VERSION_CODE <= 21000)
+#include <ruby/encoding.h>
 static VALUE
 rb_utf8_str_new(const char *ptr, long len) {
     VALUE str = rb_str_new(ptr, len);
