@@ -96,7 +96,7 @@ maxminddb_alloc(VALUE klass) {
 }
 
 // Supported 2.1 later
-#if (defined RUBY_API_VERSION_CODE) && (RUBY_API_VERSION_CODE <= 21000)
+#if (defined RUBY_API_VERSION_CODE) && (RUBY_API_VERSION_CODE <= 20100)
 #include <ruby/encoding.h>
 static VALUE
 rb_utf8_str_new(const char *ptr, long len) {
